@@ -6,42 +6,32 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import Http from '../../libs/Http';
 import Colors from './../../res/Color';
 import CoinMarketItem from './CoinMarketItem';
 
 const CoinsScreen = (props: any) => {
-  const [state, setState] = React.useState({
-    coin: {name: ''},
-    markets: [],
-  });
+  const [state, setState] = React.useState({coin: {name: ''}, markets: [],});
+  const [marketState, setMarketState] = React.useState({markets: [], loading: false});
 
   useEffect(() => {
-    console.log('useEffect');
     const param = props.route.params;
     props.navigation.setOptions({title: param.coin.symbol});
-
     getMarkets(param.coin.id);
-
     setState({
       ...state,
       coin: param.coin,
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props]);
 
   const getMarkets = async (coinId: string) => {
+    setMarketState({markets:[], loading: true});
     const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
     const markets = await Http.instance.get(url);
-    console.log(markets);
-    //setState({markets});
-    setState(prevState => {
-      let jasper = Object.assign({}, prevState); // creating copy of state variable jasper
-      jasper.markets = markets; // update the name property, assign a new value
-      return {jasper}; // return new object jasper object
-    });
+    setMarketState({markets:markets, loading: false});
   };
 
   const getSections = (coin: any) => {
@@ -66,7 +56,6 @@ const CoinsScreen = (props: any) => {
   const getSymbolIcon = (name: string) => {
     if (name) {
       const symbol = name.toLowerCase().replace(' ', '-');
-
       return `https://c1.coinlore.com/img/25x25/${symbol}.png`;
     }
   };
@@ -99,12 +88,17 @@ const CoinsScreen = (props: any) => {
       />
       <Text style={styles.marketsTitle}>Markets</Text>
 
-      <FlatList
-        style={styles.list}
-        horizontal={true}
-        data={state.markets}
-        renderItem={({item}) => <CoinMarketItem item={item} />}
-      />
+      {marketState.loading ? (
+        <ActivityIndicator style={styles.loader} color="#fff" size="large" />
+      ) : <FlatList
+      style={styles.list}
+      horizontal={true}
+      data={marketState.markets}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({item}) => <CoinMarketItem item={item}/>}
+    />}
+
+      
     </View>
   );
 };
@@ -175,6 +169,9 @@ const styles = StyleSheet.create({
   },
   btnFavoriteRemove: {
     backgroundColor: Colors.carmine,
+  },
+  loader: {
+    marginTop: 60,
   },
 });
 
