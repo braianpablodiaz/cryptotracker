@@ -13,8 +13,11 @@ import Colors from './../../res/Color';
 import CoinMarketItem from './CoinMarketItem';
 
 const CoinsScreen = (props: any) => {
-  const [state, setState] = React.useState({coin: {name: ''}, markets: [],});
-  const [marketState, setMarketState] = React.useState({markets: [], loading: false});
+  const [state, setState] = React.useState({coin: {name: ''}, markets: []});
+  const [marketState, setMarketState] = React.useState({
+    markets: [],
+    loading: false,
+  });
 
   useEffect(() => {
     const param = props.route.params;
@@ -28,10 +31,10 @@ const CoinsScreen = (props: any) => {
   }, [props]);
 
   const getMarkets = async (coinId: string) => {
-    setMarketState({markets:[], loading: true});
+    setMarketState({markets: [], loading: true});
     const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
     const markets = await Http.instance.get(url);
-    setMarketState({markets:markets, loading: false});
+    setMarketState({markets: markets, loading: false});
   };
 
   const getSections = (coin: any) => {
@@ -90,15 +93,15 @@ const CoinsScreen = (props: any) => {
 
       {marketState.loading ? (
         <ActivityIndicator style={styles.loader} color="#fff" size="large" />
-      ) : <FlatList
-      style={styles.list}
-      horizontal={true}
-      data={marketState.markets}
-      keyExtractor={(item, index) => index.toString()}
-      renderItem={({item}) => <CoinMarketItem item={item}/>}
-    />}
-
-      
+      ) : (
+        <FlatList
+          style={styles.list}
+          horizontal={true}
+          data={marketState.markets}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item}) => <CoinMarketItem item={item} />}
+        />
+      )}
     </View>
   );
 };

@@ -6,6 +6,7 @@ import Http from '../../libs/Http';
 import {CONFIG} from '../../config/env.config';
 import CoinsItem from './CoinsItem';
 import Colors from './../../res/Color';
+import CoinsSearch from './CoinsSearch';
 
 const CoinsScreen = () => {
   const navigation = useNavigation();
@@ -30,8 +31,21 @@ const CoinsScreen = () => {
     navigation.navigate('CoinDetail', {coin: coin});
   };
 
+  const handleSearch = (query: string) => {
+    const coinsFilter = state.allCoins.filter((coin: any) => {
+      return (
+        coin.name.toLowerCase().includes(query.toLocaleLowerCase()) ||
+        coin.symbol.toLowerCase().includes(query.toLocaleLowerCase())
+      );
+    });
+
+    setState({...state, coins: coinsFilter});
+  };
+
   return (
     <View style={styles.container}>
+      <CoinsSearch onChange={handleSearch} />
+
       {state.loading ? (
         <ActivityIndicator style={styles.loader} color="#fff" size="large" />
       ) : null}
